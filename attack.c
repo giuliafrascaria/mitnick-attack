@@ -89,6 +89,8 @@ int main (void)
 	bpf_u_int32 net;		/* Our IP */
 	struct pcap_pkthdr header;	/* The header that pcap gives us */
 	const u_char *packet;		/* The actual packet */
+	const struct ip_hdr *ip_hdr;
+	const struct tcp_hdr *tcp_hdr;
 
 	/* Define the device */
 	dev = pcap_lookupdev(errbuf);
@@ -135,6 +137,14 @@ int main (void)
 		packet = pcap_next(handle, &header);
 		/* Print its length */
 		printf("Jacked a packet with length of [%d]\n", header.len);
+
+		ip = (struct sniff_ip*)(packet + SIZE_ETHERNET);
+		tcp_hdr = (const struct tcphdr*)(sp + SIZE_ETHERNET + sizeof(struct iphdr));
+
+		tcp_seq seq = htonl(tcp_hdr->th_seq);
+
+		printf("seq %u\n", seq);
+
 	}
 
 	pcap_close(handle);
