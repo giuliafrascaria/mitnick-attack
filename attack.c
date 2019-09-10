@@ -21,6 +21,52 @@ char * XTERMINAL_IP = "172.16.16.4";
 #define PAYLOAD_DOS "disable"
 #define PAYLOAD_RST "enable"
 
+//initializations as per tcpdump online documentation
+#include <inttypes.h>
+
+typedef unsigned char nd_uint8_t[1];
+typedef unsigned char nd_uint16_t[2];
+typedef unsigned char nd_uint24_t[3];
+typedef unsigned char nd_uint32_t[4];
+typedef unsigned char nd_uint40_t[5];
+typedef unsigned char nd_uint48_t[6];
+typedef unsigned char nd_uint56_t[7];
+typedef unsigned char nd_uint64_t[8];
+
+#define SIZE_ETH 14
+
+struct ip_hdr { 
+    u_int8_t    ip_vhl;        /* header length, version */
+#define IP_V(ip)    (((ip)->ip_vhl & 0xf0) >> 4)
+#define IP_HL(ip)    (((ip)->ip_vhl & 0x0f) << 2)
+    u_int8_t    ip_tos;        /* type of service */
+    u_int16_t    ip_len;        /* total length */
+    u_int16_t    ip_id;        /* identification */
+    u_int16_t    ip_off;        /* fragment offset field */
+#define    IP_DF 0x4000            /* dont fragment flag */
+#define    IP_MF 0x2000            /* more fragments flag */
+#define    IP_OFFMASK 0x1fff        /* mask for fragmenting bits */
+    u_int8_t    ip_ttl;        /* time to live */
+    u_int8_t    ip_p;        /* protocol */
+    u_int16_t    ip_sum;        /* checksum */
+    struct    in_addr ip_src,ip_dst;    /* source and dest address */
+};
+
+struct tcp_hdr {
+    nd_uint16_t    th_sport;        /* source port */
+    nd_uint16_t    th_dport;        /* destination port */
+    nd_uint32_t    th_seq;            /* sequence number */
+    nd_uint32_t    th_ack;            /* acknowledgement number */
+    nd_uint8_t    th_offx2;        /* data offset, rsvd */
+    nd_uint8_t    th_flags;
+    nd_uint16_t    th_win;            /* window */
+    nd_uint16_t    th_sum;            /* checksum */
+    nd_uint16_t    th_urp;            /* urgent pointer */
+};
+
+
+
+
 //function definitions
 int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
 
@@ -138,10 +184,10 @@ int main (void)
 		/* Print its length */
 		printf("Jacked a packet with length of [%d]\n", header.len);
 
-		ip = (struct sniff_ip*)(packet + SIZE_ETHERNET);
-		tcp_hdr = (const struct tcphdr*)(sp + SIZE_ETHERNET + sizeof(struct iphdr));
+		ip_hdr = (struct ip_hdr*)(packet + SIZE_ETH);
+		tcp_hdr = (const struct tcp_hdr*)(packet + SIZE_ETH + sizeof(struct iphdr));
 
-		tcp_seq seq = htonl(tcp_hdr->th_seq);
+		uint32_t seq = htonl(tcp_hdr->th_seq);
 
 		printf("seq %u\n", seq);
 
