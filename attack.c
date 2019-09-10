@@ -124,7 +124,7 @@ int main (void)
 	}
 
 	//probe xterminal
-	int i;
+
 	printf("Starting probing\n");
 	for (i = 0; i < 5; i++)
 	{
