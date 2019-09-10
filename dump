@@ -1,0 +1,64 @@
+19:45:57.149123 ARP, Request who-has xterminal tell 172.16.16.2, length 28
+19:45:57.153572 IP 172.16.16.2.37279 > xterminal.exec: Flags [S], seq 3279885730, win 14600, options [mss 1460,sackOK,TS val 81551628 ecr 0,nop,wscale 2], length 0
+19:45:57.154333 IP 172.16.16.2.37279 > xterminal.exec: Flags [.], ack 2447589352, win 3650, options [nop,nop,TS val 81551630 ecr 65511746], length 0
+19:46:02.169712 ARP, Reply 172.16.16.2 is-at 02:00:ac:10:10:02 (oui Unknown), length 28
+19:46:07.168889 IP 172.16.16.2.37279 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81554133 ecr 65514249], length 0
+19:46:07.169082 IP 172.16.16.2.37279 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81554133 ecr 65514249], length 0
+19:46:09.181384 IP 172.16.16.2.37280 > xterminal.exec: Flags [S], seq 3761972922, win 14600, options [mss 1460,sackOK,TS val 81554636 ecr 0,nop,wscale 2], length 0
+19:46:09.182068 IP 172.16.16.2.37280 > xterminal.exec: Flags [.], ack 2447362289, win 3650, options [nop,nop,TS val 81554637 ecr 65514753], length 0
+19:46:19.196390 IP 172.16.16.2.37280 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81557140 ecr 65517256], length 0
+19:46:19.196579 IP 172.16.16.2.37280 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81557140 ecr 65517256], length 0
+19:46:20.663852 IP 172.16.16.2.37281 > xterminal.exec: Flags [S], seq 4118021627, win 14600, options [mss 1460,sackOK,TS val 81557507 ecr 0,nop,wscale 2], length 0
+19:46:20.664596 IP 172.16.16.2.37281 > xterminal.exec: Flags [.], ack 2447054716, win 3650, options [nop,nop,TS val 81557507 ecr 65517623], length 0
+19:46:30.676834 IP 172.16.16.2.37281 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81560010 ecr 65520126], length 0
+19:46:30.677047 IP 172.16.16.2.37281 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81560010 ecr 65520126], length 0
+19:46:32.241712 IP 172.16.16.2.37282 > xterminal.exec: Flags [S], seq 1823238228, win 14600, options [mss 1460,sackOK,TS val 81560401 ecr 0,nop,wscale 2], length 0
+19:46:32.242417 IP 172.16.16.2.37282 > xterminal.exec: Flags [.], ack 2446775151, win 3650, options [nop,nop,TS val 81560402 ecr 65520518], length 0
+19:46:42.256683 IP 172.16.16.2.37282 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81562905 ecr 65523021], length 0
+19:46:42.256918 IP 172.16.16.2.37282 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81562905 ecr 65523021], length 0
+19:46:43.799128 IP 172.16.16.2.37283 > xterminal.exec: Flags [S], seq 3817076270, win 14600, options [mss 1460,sackOK,TS val 81563291 ecr 0,nop,wscale 2], length 0
+19:46:43.799836 IP 172.16.16.2.37283 > xterminal.exec: Flags [.], ack 2446441838, win 3650, options [nop,nop,TS val 81563291 ecr 65523407], length 0
+19:46:53.814037 IP 172.16.16.2.37283 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81565794 ecr 65525911], length 0
+19:46:53.814240 IP 172.16.16.2.37283 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81565795 ecr 65525911], length 0
+19:47:08.948983 IP 172.16.16.2.37284 > xterminal.exec: Flags [S], seq 37685298, win 14600, options [mss 1460,sackOK,TS val 81569578 ecr 0,nop,wscale 2], length 0
+19:47:08.949741 IP 172.16.16.2.37284 > xterminal.exec: Flags [.], ack 2446176199, win 3650, options [nop,nop,TS val 81569578 ecr 65529695], length 0
+19:47:18.960896 IP 172.16.16.2.37284 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81572081 ecr 65532198], length 0
+19:47:18.961079 IP 172.16.16.2.37284 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81572081 ecr 65532198], length 0
+19:48:02.298988 IP 172.16.16.2.37285 > xterminal.exec: Flags [S], seq 3013744975, win 14600, options [mss 1460,sackOK,TS val 81582916 ecr 0,nop,wscale 2], length 0
+19:48:02.299727 IP 172.16.16.2.37285 > xterminal.exec: Flags [.], ack 2445858400, win 3650, options [nop,nop,TS val 81582916 ecr 65543032], length 0
+19:48:07.303982 ARP, Reply 172.16.16.2 is-at 02:00:ac:10:10:02 (oui Unknown), length 28
+19:48:12.313938 IP 172.16.16.2.37285 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81585419 ecr 65545536], length 0
+19:48:12.314163 IP 172.16.16.2.37285 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81585420 ecr 65545536], length 0
+19:48:17.322087 ARP, Request who-has xterminal tell 172.16.16.2, length 28
+19:48:53.075452 IP 172.16.16.2.37286 > xterminal.exec: Flags [S], seq 2327746815, win 14600, options [mss 1460,sackOK,TS val 81595610 ecr 0,nop,wscale 2], length 0
+19:48:53.076213 IP 172.16.16.2.37286 > xterminal.exec: Flags [.], ack 2445630249, win 3650, options [nop,nop,TS val 81595610 ecr 65555727], length 0
+19:48:58.087120 ARP, Reply 172.16.16.2 is-at 02:00:ac:10:10:02 (oui Unknown), length 28
+19:49:03.087056 IP 172.16.16.2.37286 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81598113 ecr 65558230], length 0
+19:49:03.087292 IP 172.16.16.2.37286 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81598113 ecr 65558230], length 0
+19:49:08.090120 ARP, Request who-has xterminal tell 172.16.16.2, length 28
+19:49:28.973889 IP 172.16.16.2.37287 > xterminal.exec: Flags [S], seq 2355890876, win 14600, options [mss 1460,sackOK,TS val 81604584 ecr 0,nop,wscale 2], length 0
+19:49:28.974583 IP 172.16.16.2.37287 > xterminal.exec: Flags [.], ack 2445420064, win 3650, options [nop,nop,TS val 81604585 ecr 65564702], length 0
+19:49:38.988930 IP 172.16.16.2.37287 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81607088 ecr 65567205], length 0
+19:49:38.989175 IP 172.16.16.2.37287 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81607088 ecr 65567205], length 0
+19:49:58.252449 IP 172.16.16.2.37288 > xterminal.exec: Flags [S], seq 2227582592, win 14600, options [mss 1460,sackOK,TS val 81611904 ecr 0,nop,wscale 2], length 0
+19:49:58.253192 IP 172.16.16.2.37288 > xterminal.exec: Flags [.], ack 2445117327, win 3650, options [nop,nop,TS val 81611904 ecr 65572021], length 0
+19:50:08.267416 IP 172.16.16.2.37288 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81614408 ecr 65574525], length 0
+19:50:08.267611 IP 172.16.16.2.37288 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81614408 ecr 65574525], length 0
+19:51:36.725444 IP 172.16.16.2.37289 > xterminal.exec: Flags [S], seq 2584763709, win 14600, options [mss 1460,sackOK,TS val 81636522 ecr 0,nop,wscale 2], length 0
+19:51:36.726110 IP 172.16.16.2.37289 > xterminal.exec: Flags [.], ack 2444775516, win 3650, options [nop,nop,TS val 81636523 ecr 65596640], length 0
+19:51:41.732254 ARP, Reply 172.16.16.2 is-at 02:00:ac:10:10:02 (oui Unknown), length 28
+19:51:46.737668 IP 172.16.16.2.37289 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81639025 ecr 65599143], length 0
+19:51:46.737871 IP 172.16.16.2.37289 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81639025 ecr 65599143], length 0
+19:51:47.860684 IP 172.16.16.2.37290 > xterminal.exec: Flags [S], seq 3685725425, win 14600, options [mss 1460,sackOK,TS val 81639306 ecr 0,nop,wscale 2], length 0
+19:51:47.861368 IP 172.16.16.2.37290 > xterminal.exec: Flags [.], ack 2444426691, win 3650, options [nop,nop,TS val 81639306 ecr 65599424], length 0
+19:51:57.875366 IP 172.16.16.2.37290 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81641810 ecr 65601927], length 0
+19:51:57.875600 IP 172.16.16.2.37290 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81641810 ecr 65601927], length 0
+19:51:58.571157 IP 172.16.16.2.37291 > xterminal.exec: Flags [S], seq 3623052264, win 14600, options [mss 1460,sackOK,TS val 81641984 ecr 0,nop,wscale 2], length 0
+19:51:58.571900 IP 172.16.16.2.37291 > xterminal.exec: Flags [.], ack 2444220532, win 3650, options [nop,nop,TS val 81641984 ecr 65602102], length 0
+19:52:08.579892 IP 172.16.16.2.37291 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81644486 ecr 65604604], length 0
+19:52:08.580176 IP 172.16.16.2.37291 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81644486 ecr 65604604], length 0
+19:52:16.510615 IP 172.16.16.2.37292 > xterminal.exec: Flags [S], seq 583344013, win 14600, options [mss 1460,sackOK,TS val 81646469 ecr 0,nop,wscale 2], length 0
+19:52:16.511285 IP 172.16.16.2.37292 > xterminal.exec: Flags [.], ack 2443887633, win 3650, options [nop,nop,TS val 81646469 ecr 65606586], length 0
+19:52:26.525268 IP 172.16.16.2.37292 > xterminal.exec: Flags [.], ack 17, win 3650, options [nop,nop,TS val 81648972 ecr 65609090], length 0
+19:52:26.525542 IP 172.16.16.2.37292 > xterminal.exec: Flags [F.], seq 0, ack 18, win 3650, options [nop,nop,TS val 81648972 ecr 65609090], length 0
+
