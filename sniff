@@ -1,0 +1,18 @@
+13:28:45.738884 IP xterminal.exec > 172.16.16.2.37249: Flags [S.], seq 2453864640, ack 3536684104, win 14480, options [mss 1460,sackOK,TS val 59853799 ecr 75893776,nop,wscale 2], length 0
+13:28:50.746669 ARP, Reply xterminal is-at 02:00:ac:10:10:04 (oui Unknown), length 46
+13:28:55.749408 IP xterminal.exec > 172.16.16.2.37249: Flags [P.], seq 1:17, ack 1, win 3620, options [nop,nop,TS val 59856302 ecr 75893776], length 16
+13:28:55.749537 IP xterminal.exec > 172.16.16.2.37249: Flags [F.], seq 17, ack 1, win 3620, options [nop,nop,TS val 59856302 ecr 75893776], length 0
+13:28:55.750214 IP xterminal.exec > 172.16.16.2.37249: Flags [.], ack 2, win 3620, options [nop,nop,TS val 59856302 ecr 75896278], length 0
+13:28:57.650649 IP xterminal.exec > 172.16.16.2.37250: Flags [S.], seq 2453568259, ack 654836749, win 14480, options [mss 1460,sackOK,TS val 59856777 ecr 75896753,nop,wscale 2], length 0
+13:29:07.664642 IP xterminal.exec > 172.16.16.2.37250: Flags [P.], seq 1:17, ack 1, win 3620, options [nop,nop,TS val 59859280 ecr 75896754], length 16
+13:29:07.664833 IP xterminal.exec > 172.16.16.2.37250: Flags [F.], seq 17, ack 1, win 3620, options [nop,nop,TS val 59859280 ecr 75896754], length 0
+13:29:07.665499 IP xterminal.exec > 172.16.16.2.37250: Flags [.], ack 2, win 3620, options [nop,nop,TS val 59859281 ecr 75899257], length 0
+13:29:10.448576 IP xterminal.exec > 172.16.16.2.37251: Flags [S.], seq 2453254182, ack 1129227465, win 14480, options [mss 1460,sackOK,TS val 59859976 ecr 75899953,nop,wscale 2], length 0
+13:29:20.462758 IP xterminal.exec > 172.16.16.2.37251: Flags [P.], seq 1:17, ack 1, win 3620, options [nop,nop,TS val 59862480 ecr 75899953], length 16
+13:29:20.462894 IP xterminal.exec > 172.16.16.2.37251: Flags [F.], seq 17, ack 1, win 3620, options [nop,nop,TS val 59862480 ecr 75899953], length 0
+13:29:20.463437 IP xterminal.exec > 172.16.16.2.37251: Flags [.], ack 2, win 3620, options [nop,nop,TS val 59862480 ecr 75902457], length 0
+13:29:21.714195 IP xterminal.exec > 172.16.16.2.37252: Flags [S.], seq 2452944597, ack 614571475, win 14480, options [mss 1460,sackOK,TS val 59862793 ecr 75902769,nop,wscale 2], length 0
+13:29:31.728413 IP xterminal.exec > 172.16.16.2.37252: Flags [P.], seq 1:17, ack 1, win 3620, options [nop,nop,TS val 59865296 ecr 75902770], length 16
+13:29:31.728538 IP xterminal.exec > 172.16.16.2.37252: Flags [F.], seq 17, ack 1, win 3620, options [nop,nop,TS val 59865296 ecr 75902770], length 0
+13:29:31.729142 IP xterminal.exec > 172.16.16.2.37252: Flags [.], ack 2, win 3620, options [nop,nop,TS val 59865297 ecr 75905273], length 0
+

