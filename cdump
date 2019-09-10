@@ -1,0 +1,16 @@
+20:17:22.094252 IP xterminal.shell > 172.16.16.2.47217: Flags [S.], seq 2435725781, ack 805520100, win 14600, options [mss 1460], length 0
+20:17:22.095952 IP xterminal.shell > 172.16.16.2.15305: Flags [S.], seq 2435367113, ack 1570209805, win 14600, options [mss 1460], length 0
+20:17:22.096852 IP xterminal.shell > 172.16.16.2.14449: Flags [S.], seq 2435008448, ack 2033142913, win 14600, options [mss 1460], length 0
+20:17:22.097424 IP xterminal.shell > 172.16.16.2.63207: Flags [S.], seq 2434649786, ack 1175756526, win 14600, options [mss 1460], length 0
+20:17:22.098420 IP xterminal.shell > 172.16.16.2.57662: Flags [S.], seq 2434291127, ack 1575699761, win 14600, options [mss 1460], length 0
+20:17:22.099124 IP xterminal.shell > 172.16.16.2.58160: Flags [S.], seq 2433932471, ack 1774603377, win 14600, options [mss 1460], length 0
+20:17:22.100011 IP xterminal.shell > 172.16.16.2.58743: Flags [S.], seq 2433573818, ack 607085556, win 14600, options [mss 1460], length 0
+20:17:22.100712 IP xterminal.shell > 172.16.16.2.48055: Flags [S.], seq 2433215168, ack 431416277, win 14600, options [mss 1460], length 0
+20:17:22.101484 IP xterminal.shell > 172.16.16.2.12301: Flags [S.], seq 2432856521, ack 1649992148, win 14600, options [mss 1460], length 0
+20:17:22.102257 IP xterminal.shell > 172.16.16.2.8318: Flags [S.], seq 2432497877, ack 401523378, win 14600, options [mss 1460], length 0
+20:17:22.103065 IP xterminal.shell > 172.16.16.2.4964: Flags [S.], seq 2432139236, ack 458797208, win 14600, options [mss 1460], length 0
+20:17:22.103783 IP xterminal.shell > 172.16.16.2.61703: Flags [S.], seq 2431780598, ack 1798105338, win 14600, options [mss 1460], length 0
+20:17:22.105101 IP xterminal.shell > 172.16.16.2.14007: Flags [S.], seq 2431421963, ack 875141415, win 14600, options [mss 1460], length 0
+20:17:22.105855 IP xterminal.shell > 172.16.16.2.39865: Flags [S.], seq 2431063331, ack 258247159, win 14600, options [mss 1460], length 0
+20:17:22.107658 IP xterminal.shell > 172.16.16.2.48852: Flags [S.], seq 2430704702, ack 726843991, win 14600, options [mss 1460], length 0
+
