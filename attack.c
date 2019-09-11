@@ -206,14 +206,14 @@ int main (void)
 
 	//compute nextseq
 	printf("predictions\n");
-	printf("%u\n", compute_next_seq(seq_array[0], seq_array[1]));
-	printf("%u\n", compute_next_seq(seq_array[1], seq_array[2]));
-	printf("%u\n", compute_next_seq(seq_array[2], seq_array[3]));
-	printf("%u\n", compute_next_seq(seq_array[3], seq_array[4]));
-        printf("%u\n", compute_next_seq(seq_array[4], seq_array[5]));
-        printf("%u\n", compute_next_seq(seq_array[5], seq_array[6]));
-        printf("%u\n", compute_next_seq(seq_array[6], seq_array[7]));
-        printf("%u\n", compute_next_seq(seq_array[7], seq_array[8]));
+	printf("%u\n", compute_next_seq(seq_array[1], seq_array[0]));
+	printf("%u\n", compute_next_seq(seq_array[2], seq_array[1]));
+	printf("%u\n", compute_next_seq(seq_array[3], seq_array[2]));
+	printf("%u\n", compute_next_seq(seq_array[4], seq_array[3]));
+        printf("%u\n", compute_next_seq(seq_array[5], seq_array[4]));
+        printf("%u\n", compute_next_seq(seq_array[6], seq_array[5]));
+        printf("%u\n", compute_next_seq(seq_array[7], seq_array[6]));
+        printf("%u\n", compute_next_seq(seq_array[8], seq_array[7]));
 
 
 	//exploit trust relation
@@ -374,6 +374,7 @@ tcp_seq compute_next_seq(tcp_seq n1, tcp_seq n2)
 {
 	//expression for next sequence number
 	//seq(N) = 2seq(N-1) - seq(N-2) + 3
+	//tcp_seq n = 2*n1 - n2 + 3;
 	tcp_seq n = 2*n1 - n2 + 3;
 	return n;
 }
