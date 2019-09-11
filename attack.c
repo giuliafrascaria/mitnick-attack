@@ -147,7 +147,7 @@ int main (void)
 	char *dev;			/* The device to sniff on */
 	char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
 	struct bpf_program fp;		/* The compiled filter */
-	char filter_exp[] = "port 514";	/* The filter expression */
+	char filter_exp[] = "src host xterminal";	/* The filter expression */
 	bpf_u_int32 mask;		/* Our netmask */
 	bpf_u_int32 net;		/* Our IP */
 	struct pcap_pkthdr header;	/* The header that pcap gives us */
@@ -201,6 +201,13 @@ int main (void)
 		/* Print its length */
 		printf("Jacked a packet with length of [%d]\n", header.len);
 
+		//if (header.len != 60)
+		//{
+		//	packet = pcap_next(handle, &header);
+
+		//}
+		//else
+		//{
 		ip_hdr = (struct ip_hdr *) (packet + SIZE_ETH);
 		tcp_hdr = (const struct tcp_hdr *) (packet + SIZE_ETH + sizeof(struct ip_hdr));
 
@@ -208,6 +215,7 @@ int main (void)
 		tcp_seq ack = htonl(tcp_hdr->th_ack);
 
 		printf("seq %u, ack %u\n", seq, ack);
+		//}
 
 	}
 
