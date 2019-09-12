@@ -204,6 +204,7 @@ int main (void)
 	}
 
 	pcap_close(handle);
+	sleep(1);
 
 	//compute nextseq
 	printf("predictions\n");
@@ -303,7 +304,7 @@ uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32
 }
 
 
-int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, uint16_t ack)
+int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, u_long ack)
 {
 
 	libnet_ptag_t t;
