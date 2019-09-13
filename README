@@ -4,7 +4,7 @@ giulia.frascaria@gmail.com
 gfa220
 2608500
 
-For this attack, the first thing I had to do was DOSing the server, so that it cannot respond to packets from the xterminal.
+For this attack, the first thing I had to do was DOSing the server, so that it cannot respond to packets from the xterminal and reset my spoof attempt.
 
 I used libnet to craft SYN packets with a fake IP source, so that they would not be tracked to the kevin IP.
 After sending many packets with the "disable" payload to simulate the DOS, the server is no longer responsive if I try to ping it.
@@ -22,6 +22,9 @@ In this way, I was able to craft a spoofed SYN packet from server to xterminal, 
 During the debugging, I used the arpspoof tool to poison the arp tables of the xterminal and have the SYN-ACK responses sent to me.
 The final exploit however does not make use of it and only spoofs the IP address of the server, so that it is more in line with the original attack.
 
-I pushed the backdoor together with the ACK, and was able to login from the kevin IP, and obtain the secret
+I pushed the backdoor together with the ACK, and was able to login from the kevin IP, and obtain the secret.
+I looked at the man page of rshd to figure out the expected format of the payload, so that the connection would not be reset by the x-terminal.
+The payload I sent to the x-terminal is 
+"0\0tsutomu\0tsutomu\0echo + + >> .rhosts\0"
 
 After completing the attack, I re-enabled the server sending "enable" packets from a fake ip address.

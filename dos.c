@@ -5,11 +5,6 @@
 #include <unistd.h>
 
 
-//eth level data -> do I need this??
-#define KEVIN_MAC "02:00:ac:10:10:02"
-#define SERVER_MAC "02:00:ac:10:10:03"
-#define XTERMINAL_MAC "02:00:ac:10:10:04"
-
 //ip level data
 char * FAKE_IP = "172.42.42.2";
 char * SERVER_IP = "172.16.16.3";
