@@ -58,7 +58,7 @@ int main (void)
 
 	int i;
 	printf("Starting probing\n");
-	for (i = 0; i < 15; i++)
+	for (i = 0; i < 1000; i++)
 	{
 		//craft and send 10 packets with "disable" payload
 		printf("probe\n");
