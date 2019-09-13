@@ -13,7 +13,6 @@
 //ip level data
 char * FAKE_IP = "172.42.42.2";
 char * SERVER_IP = "172.16.16.3";
-#define XTERMINAL_IP "172.16.16.4"
 
 //tcp level data
 #define PORT 513
